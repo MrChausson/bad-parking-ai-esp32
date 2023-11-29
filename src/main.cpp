@@ -26,8 +26,11 @@
 
 #include "esp_camera.h"
 
-// for screen
-#include <Wire.h>
+// for wifi
+#include "WiFi.h"
+
+const char* ssid     = "technical"; // Change this to your WiFi SSID
+const char* password = "cykabliat"; // Change this to your WiFi password
 
 // Select camera model - find more camera models in camera_pins.h file here
 // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/Camera/CameraWebServer/camera_pins.h
@@ -158,6 +161,9 @@ void setup()
     pinMode(LED1,OUTPUT);
     pinMode(LED2,OUTPUT);
 
+    // WIFI
+    WiFi.begin(ssid, password);
+
     // put your setup code here, to run once:
     Serial.begin(115200);
     //comment out the below line to start inference immediately after upload
@@ -172,6 +178,17 @@ void setup()
 
     ei_printf("\nStarting continious inference in 2 seconds...\n");
     ei_sleep(2000);
+
+    // WAIT for wifi
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+
+    Serial.println("");
+    Serial.println("WiFi connected.");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
 }
 
 /**
