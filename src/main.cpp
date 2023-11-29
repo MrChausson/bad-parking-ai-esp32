@@ -28,9 +28,15 @@
 
 // for wifi
 #include "WiFi.h"
+#include <WebServer.h>
+
+char json_to_send[50]; // adjust the size as needed
 
 const char* ssid     = "technical"; // Change this to your WiFi SSID
 const char* password = "cykabliat"; // Change this to your WiFi password
+// const char* ssid     = "Randomisable";
+// const char* password = "Shazen1234";
+WebServer server(80);
 
 // Select camera model - find more camera models in camera_pins.h file here
 // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/Camera/CameraWebServer/camera_pins.h
@@ -189,6 +195,13 @@ void setup()
     Serial.println("WiFi connected.");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
+    // HTTP server part
+    server.enableCORS(); //This is the magic
+    sprintf(json_to_send, "{\"message: %s\"}", "Hello World!");
+    server.on("/", []() {
+        server.send(200, "application/json", json_to_send);
+    });
+    server.begin();
 }
 
 /**
@@ -250,6 +263,7 @@ void loop()
         ei_printf("    No objects found\n");
     }
     ei_printf("    %d Badly parked cars found\n", cars_found);
+    sprintf(json_to_send, "{\"badly_parked_cars\": %d}", cars_found);
     if (cars_found > 1) {
         digitalWrite(LED1,HIGH);
         digitalWrite(LED2,HIGH);
@@ -274,7 +288,7 @@ void loop()
 
 
     free(snapshot_buf);
-
+    server.handleClient();
 }
 
 /**
